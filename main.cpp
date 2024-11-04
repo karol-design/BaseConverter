@@ -29,17 +29,17 @@ typedef unsigned int uint64_t;
 typedef struct {
   string num_str;
   num_base_t origin_base;
-} SysBinaries_data_t;
+} NumConverter_data_t;
 
 /*===========================================================================
-                            BASECONV CLASS
+                            NUMCONVERTER CLASS
 ===========================================================================*/
 
-class BaseConv {
+class NumConverter {
  public:
   /// @brief [Constructor] Verify if the number is valid and convert it to decimal
-  /// @param _data SysBinaries_data_t struct with the number and origin base
-  BaseConv(const SysBinaries_data_t data) : _data(data) {
+  /// @param _data NumConverter_data_t struct with the number and origin base
+  NumConverter(const NumConverter_data_t data) : _data(data) {
     // Verify if data.num is a number
     if(isValid() != true) {
         cout << "Error: invalid number";
@@ -80,7 +80,7 @@ class BaseConv {
   /// @brief Set the number to be converted and its base
   /// @param number Num to be converted
   /// @param base Current base
-  void setNumber(const SysBinaries_data_t data) {
+  void setNumber(const NumConverter_data_t data) {
     _data.num_str = data.num_str;
     _data.origin_base = data.origin_base;
   }
@@ -94,7 +94,7 @@ class BaseConv {
  protected:
  
  private:
-  SysBinaries_data_t _data;
+  NumConverter_data_t _data;
   uint64_t _num;
 
   bool isValid() {
@@ -132,8 +132,8 @@ int main() {
   num_base_t base_origin = DEC;
   num_base_t base_target = BIN;
 
-  SysBinaries_data_t conv_data = {num_origin, base_origin};
-  BaseConv conv(conv_data);
+  NumConverter_data_t conv_data = {num_origin, base_origin};
+  NumConverter conv(conv_data);
 
   conv.printNumber();
   conv.toBase(base_target, &num_conv);
