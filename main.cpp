@@ -5,38 +5,40 @@
 using namespace std;
 
 /*===========================================================================
+                        FUNCTIONS DECLARATION
+===========================================================================*/
+
+void testNumConverter();
+
+/*===========================================================================
                         TYPEDEFS, MACROS AND CONSTS
 ===========================================================================*/
 
 /// @brief Numeral base type
 typedef enum {
-  BIN,
-  OCT,
-  DEC,
-  HEX
+  BASE_BIN,
+  BASE_OCT,
+  BASE_DEC,
+  BASE_HEX
 } num_base_t;
 
-/// @brief Base (uint8_t) mappings of num_base_t enum
-static const uint8_t num_base_uint_mapping[] = {2, 8, 10, 16};
+/// @brief Base (uint8_t) mapping of num_base_t enum
+static const uint8_t BASE_TO_UINT[] = {2, 8, 10, 16};
 
-/// @brief String mappings of num_base_t enum
-static const char* num_base_str_mapping[] = {
-    "Binary",
-    "Octal",
-    "Decimal",
-    "Hexadecimal"};
+/// @brief String mapping of num_base_t enum
+static const char* BASE_TO_STRING[] = {"Binary", "Octal", "Decimal", "Hexadecimal"};
 
 // Unsigned long int type to be used throughout this app (not required in C++20 or newer)
 // typedef unsigned long int uint64_t;
 
 /// @brief Struct with the initial data for number conversion
 typedef struct {
-  string num_str;
-  num_base_t origin_base;
+  string numStr;
+  num_base_t originBase;
 } NumConverter_data_t;
 
 /*===========================================================================
-                            NUMCONVERTER CLASS
+                            NumConverter CLASS
 ===========================================================================*/
 
 class NumConverter {
@@ -44,37 +46,35 @@ class NumConverter {
   /// @brief [Constructor] Verify if the number is valid and convert it to decimal
   /// @param _data NumConverter_data_t struct with the number and origin base
   NumConverter(const NumConverter_data_t data) : _data(data) {
-    // Verify if data.num is a number
-    if (isValid() != true) {
+    if (!isValidNumber()) {
       cout << "Error: invalid number (non-digit character detected)!" << endl;
     }
-    // Convert the string to decimal - common format for internal processing
-    _num = strToDec();
+    _numDecimal = strToDec();
   };
 
   /// @brief Convert the number to a selected numeral system
   /// @param target_base Target base
-  /// @param str Pointer to a string for storing the result of the conversion
-  void toBase(num_base_t target_base, string* str) {
+  /// @param result Pointer to a string for storing the result of the conversion
+  void toBase(num_base_t target_base, string* result) {
     switch (target_base) {
-      case BIN: {
-        *str = toBin();
+      case BASE_BIN: {
+        *result = toBin();
         break;
       }
-      case OCT: {
-        *str = toOct();
+      case BASE_OCT: {
+        *result = toOct();
         break;
       }
-      case DEC: {
-        *str = toDec();
+      case BASE_DEC: {
+        *result = toDec();
         break;
       }
-      case HEX: {
-        *str = toHex();
+      case BASE_HEX: {
+        *result = toHex();
         break;
       }
       default: {
-        *str = "Error: incorrect target base";
+        *result = "Error: incorrect target base";
         break;
       }
     }
@@ -84,62 +84,58 @@ class NumConverter {
   /// @brief Set the number to be converted and its base
   /// @param data NumConverter_data_t struct with the number and origin base
   void setNumber(const NumConverter_data_t data) {
-    _data.num_str = data.num_str;
-    _data.origin_base = data.origin_base;
-    // Verify if data.num is a number
-    if (isValid() != true) {
+    _data.numStr = data.numStr;
+    _data.originBase = data.originBase;
+    if (!isValidNumber()) {
       cout << "Error: invalid number";
     }
-    // Convert the string to decimal - common format for internal processing
-    _num = strToDec();
+    _numDecimal = strToDec();
   }
 
-  /// @brief Print the current number and its numeral system (for debugging purposes)
+  /// @brief Print the current number and its numeral system
   void printNumber(void) {
-    cout << "Value: " << _data.num_str << ", ";
-    cout << "Numeral system: " << num_base_str_mapping[_data.origin_base] << endl;
+    cout << "Value: " << _data.numStr << ", ";
+    cout << "Numeral system: " << BASE_TO_STRING[_data.originBase] << endl;
   }
 
  protected:
  private:
   NumConverter_data_t _data;
-  uint64_t _num;
+  uint64_t _numDecimal;
 
-  bool isValid() {
-    bool ret = true;
+  bool isValidNumber() {
     // Itterate through the string and validate if contains only digits
-    for (const char& c : _data.num_str) {
-      if (isdigit(c) != true) {
-        ret = false;
-        break;
+    for (const char& c : _data.numStr) {
+      if (!isdigit(c)) {
+        return false;
       }
     }
-    return ret;
+    return true;
   }
 
   uint64_t strToDec() {
     size_t processed_chars;
-    uint64_t dec = static_cast<uint64_t>(abs(stol(_data.num_str.c_str(), &processed_chars, num_base_uint_mapping[_data.origin_base])));
+    uint64_t dec = static_cast<uint64_t>(abs(stol(_data.numStr.c_str(), &processed_chars, BASE_TO_UINT[_data.originBase])));
     return dec;
   }
 
   string toDec() {
-    string ret = vformat("{:d}", make_format_args(_num));
+    string ret = vformat("{:d}", make_format_args(_numDecimal));
     return ret;
   }
 
   string toHex() {
-    string ret = vformat("{:#x}", make_format_args(_num));
+    string ret = vformat("{:#x}", make_format_args(_numDecimal));
     return ret;
   }
 
   string toOct() {
-    string ret = vformat("{:#o}", make_format_args(_num));
+    string ret = vformat("{:#o}", make_format_args(_numDecimal));
     return ret;
   }
 
   string toBin() {
-    string ret = vformat("{:#b}", make_format_args(_num));
+    string ret = vformat("{:#b}", make_format_args(_numDecimal));
     return ret;
   }
 };
@@ -149,22 +145,37 @@ class NumConverter {
 ===========================================================================*/
 
 int main() {
-  string num_conv, num_origin = "1011";
-  num_base_t base, base_start;
+  testNumConverter();
+  return 0;
+}
 
-  for (uint8_t base_start_uint = BIN; base_start_uint <= HEX; base_start_uint++) {
-    base_start = static_cast<num_base_t>(base_start_uint);
-    cout << endl;
-    NumConverter_data_t conv_data = {num_origin, base_start};
-    NumConverter conv(conv_data);
-    conv.printNumber();
+/*===========================================================================
+                            TEST FUNCTION
+===========================================================================*/
 
-    for (uint8_t base_uint = BIN; base_uint <= HEX; base_uint++) {
-      base = static_cast<num_base_t>(base_uint);
-      conv.toBase(base, &num_conv);
-      cout << num_base_str_mapping[base_start] << " -> " << num_base_str_mapping[base] << " | " << num_origin << " -> " << num_conv << endl;
+/// @brief Test NumConverter class for all starting / target numeral system on one selected value
+void testNumConverter() {
+  const string EXPECTED_OUTPUT[4][4] = {{"0b101", "05", "5", "0x5"}, {"0b1000001", "0101", "65", "0x41"}, {"0b1100101", "0145", "101", "0x65"}, {"0b100000001", "0401", "257", "0x101"}};
+  string convertedNum, startingNum = "101";
+  num_base_t targetBase, startingBase;
+
+  // Itterate though all starting bases
+  for (uint8_t startingBaseUint = BASE_BIN; startingBaseUint <= BASE_HEX; startingBaseUint++) {
+    startingBase = static_cast<num_base_t>(startingBaseUint);
+    NumConverter_data_t convData = {startingNum, startingBase};
+    NumConverter conv(convData);
+
+    // Itterate though all target bases
+    for (uint8_t targetBaseUint = BASE_BIN; targetBaseUint <= BASE_HEX; targetBaseUint++) {
+      targetBase = static_cast<num_base_t>(targetBaseUint);
+      conv.toBase(targetBase, &convertedNum);
+
+      // Verify if the output is identical to the expected value
+      if (convertedNum != EXPECTED_OUTPUT[startingBase][targetBase]) {
+        cout << "Test result: failed! Output: " << convertedNum << ", expected: " << EXPECTED_OUTPUT[startingBase][targetBase] << endl;
+        return;
+      }
     }
   }
-
-  return 0;
+  cout << "Test result: success!" << endl;
 }
