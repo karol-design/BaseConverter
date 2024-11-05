@@ -1,7 +1,6 @@
 #include <format>
 #include <iostream>
 #include <string>
-#include <iomanip>
 
 using namespace std;
 
@@ -17,7 +16,7 @@ typedef enum {
   HEX
 } num_base_t;
 
-/// @brief String mappings of num_base_t enum
+/// @brief Base (uint8_t) mappings of num_base_t enum
 static const uint8_t num_base_uint_mapping[] = {2, 8, 10, 16};
 
 /// @brief String mappings of num_base_t enum
@@ -47,7 +46,7 @@ class NumConverter {
   NumConverter(const NumConverter_data_t data) : _data(data) {
     // Verify if data.num is a number
     if (isValid() != true) {
-      cout << "Error: invalid number";
+      cout << "Error: invalid number (non-digit character detected)!" << endl;
     }
     // Convert the string to decimal - common format for internal processing
     _num = strToDec();
@@ -95,10 +94,10 @@ class NumConverter {
     _num = strToDec();
   }
 
-  /// @brief Print the current number and its original base (for debugging purposes)
+  /// @brief Print the current number and its numeral system (for debugging purposes)
   void printNumber(void) {
-    cout << "Number: " << _data.num_str << ", ";
-    cout << "Origin: " << num_base_str_mapping[_data.origin_base] << endl;
+    cout << "Value: " << _data.num_str << ", ";
+    cout << "Numeral system: " << num_base_str_mapping[_data.origin_base] << endl;
   }
 
  protected:
@@ -107,8 +106,15 @@ class NumConverter {
   uint64_t _num;
 
   bool isValid() {
-    bool val = true;
-    return val;
+    bool ret = true;
+    // Itterate through the string and validate if contains only digits
+    for (const char& c : _data.num_str) {
+      if (isdigit(c) != true) {
+        ret = false;
+        break;
+      }
+    }
+    return ret;
   }
 
   uint64_t strToDec() {
@@ -143,8 +149,6 @@ class NumConverter {
 ===========================================================================*/
 
 int main() {
-  cout << "C++ standard used: " << __cplusplus << endl;
-
   string num_conv, num_origin = "1011";
   num_base_t base, base_start;
 
