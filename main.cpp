@@ -1,5 +1,7 @@
+#include <format>
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -9,21 +11,24 @@ using namespace std;
 
 /// @brief Numeral base type
 typedef enum {
-  HEX,
-  DEC,
+  BIN,
   OCT,
-  BIN
+  DEC,
+  HEX
 } num_base_t;
 
 /// @brief String mappings of num_base_t enum
-static const char* num_base_mapping[] = {
-    "Hexadecimal",
-    "Decimal",
-    "Octal",
-    "Binary"};
+static const uint8_t num_base_uint_mapping[] = {2, 8, 10, 16};
 
-// Unsigned int type to be used throughout this app
-typedef unsigned int uint64_t;
+/// @brief String mappings of num_base_t enum
+static const char* num_base_str_mapping[] = {
+    "Binary",
+    "Octal",
+    "Decimal",
+    "Hexadecimal"};
+
+// Unsigned long int type to be used throughout this app (not required in C++20 or newer)
+// typedef unsigned long int uint64_t;
 
 /// @brief Struct with the initial data for number conversion
 typedef struct {
@@ -41,17 +46,17 @@ class NumConverter {
   /// @param _data NumConverter_data_t struct with the number and origin base
   NumConverter(const NumConverter_data_t data) : _data(data) {
     // Verify if data.num is a number
-    if(isValid() != true) {
-        cout << "Error: invalid number";
+    if (isValid() != true) {
+      cout << "Error: invalid number";
     }
     // Convert the string to decimal - common format for internal processing
-    _num = toDec();
+    _num = strToDec();
   };
 
   /// @brief Convert the number to a selected numeral system
   /// @param target_base Target base
-  /// @param str String to store the result of the conversion
-  void toBase(num_base_t target_base, string *str) {
+  /// @param str Pointer to a string for storing the result of the conversion
+  void toBase(num_base_t target_base, string* str) {
     switch (target_base) {
       case BIN: {
         *str = toBin();
@@ -62,7 +67,7 @@ class NumConverter {
         break;
       }
       case DEC: {
-        *str = to_string(_num);
+        *str = toDec();
         break;
       }
       case HEX: {
@@ -78,21 +83,25 @@ class NumConverter {
   };
 
   /// @brief Set the number to be converted and its base
-  /// @param number Num to be converted
-  /// @param base Current base
+  /// @param data NumConverter_data_t struct with the number and origin base
   void setNumber(const NumConverter_data_t data) {
     _data.num_str = data.num_str;
     _data.origin_base = data.origin_base;
+    // Verify if data.num is a number
+    if (isValid() != true) {
+      cout << "Error: invalid number";
+    }
+    // Convert the string to decimal - common format for internal processing
+    _num = strToDec();
   }
 
   /// @brief Print the current number and its original base (for debugging purposes)
   void printNumber(void) {
     cout << "Number: " << _data.num_str << ", ";
-    cout << "Origin: " << num_base_mapping[_data.origin_base] << endl;
+    cout << "Origin: " << num_base_str_mapping[_data.origin_base] << endl;
   }
 
  protected:
- 
  private:
   NumConverter_data_t _data;
   uint64_t _num;
@@ -102,23 +111,29 @@ class NumConverter {
     return val;
   }
 
-  uint64_t toDec() {
-    uint64_t dec = 0;
+  uint64_t strToDec() {
+    size_t processed_chars;
+    uint64_t dec = static_cast<uint64_t>(abs(stol(_data.num_str.c_str(), &processed_chars, num_base_uint_mapping[_data.origin_base])));
     return dec;
   }
 
+  string toDec() {
+    string ret = vformat("{:d}", make_format_args(_num));
+    return ret;
+  }
+
   string toHex() {
-    string ret = "0x00";
+    string ret = vformat("{:#x}", make_format_args(_num));
     return ret;
   }
 
   string toOct() {
-    string ret = "00";
+    string ret = vformat("{:#o}", make_format_args(_num));
     return ret;
   }
 
   string toBin() {
-    string ret = "b00";
+    string ret = vformat("{:#b}", make_format_args(_num));
     return ret;
   }
 };
@@ -128,16 +143,24 @@ class NumConverter {
 ===========================================================================*/
 
 int main() {
-  string num_conv, num_origin = "100";
-  num_base_t base_origin = DEC;
-  num_base_t base_target = BIN;
+  cout << "C++ standard used: " << __cplusplus << endl;
 
-  NumConverter_data_t conv_data = {num_origin, base_origin};
-  NumConverter conv(conv_data);
+  string num_conv, num_origin = "1011";
+  num_base_t base, base_start;
 
-  conv.printNumber();
-  conv.toBase(base_target, &num_conv);
-  cout << "Original number: " << num_origin << ", converted: " << num_conv << endl;
+  for (uint8_t base_start_uint = BIN; base_start_uint <= HEX; base_start_uint++) {
+    base_start = static_cast<num_base_t>(base_start_uint);
+    cout << endl;
+    NumConverter_data_t conv_data = {num_origin, base_start};
+    NumConverter conv(conv_data);
+    conv.printNumber();
+
+    for (uint8_t base_uint = BIN; base_uint <= HEX; base_uint++) {
+      base = static_cast<num_base_t>(base_uint);
+      conv.toBase(base, &num_conv);
+      cout << num_base_str_mapping[base_start] << " -> " << num_base_str_mapping[base] << " | " << num_origin << " -> " << num_conv << endl;
+    }
+  }
 
   return 0;
 }
