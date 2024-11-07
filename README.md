@@ -7,7 +7,7 @@ General requirements:
 * The base/numeral system of the input sould be detected automatically
 * The functionality should be encapsulated in a single class called BaseConv
 * Both input and output from the BaseConv class should be in a form of a string
-* An additional class called BaseConvCLI should handle the interaction with the user through the Command Prompt
+* An additional class called CLI should handle the interaction with the user through the Command Prompt
 * Any data exchange between both classes should be carried out via a dedicated structure
 * The number under conversion should be of uint64_t type
 * The BaseConv class should use as many built-in functions (e.g. strtol, bitwidth etc.) as possible
@@ -18,7 +18,7 @@ General requirements:
 
 ## ToDo:
 - Finish the BaseConv class
-- Add BaseConvCLI class
+- Add CLI class
 - Split the project into separate files and configure CMake & build automation
 - CMake Configuration and build automation
 - Prepare GIT repo and send to Michał when classes are ready
