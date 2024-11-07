@@ -64,18 +64,39 @@ typedef struct {
 
 class BaseConverter {
  public:
-  /// @brief [Constructor with data struct] Verify if the number is valid and convert it to decimal
-  /// @param _data BaseConverterData struct with the number and origin base
-  BaseConverter(BaseConverterData* data) : _data(*data) {
-    if (!isValidNumber()) {
-      cout << "Error: invalid number (non-digit character detected)!" << endl;
-    }
-    _numDecimal = strToDec();
-  }
-
-  /// @brief [Constructor no parameters]
+  /// @brief [Constructor]
   BaseConverter() {
     _isValid = false;  // No number and base provided
+  }
+
+  /// @brief [Constructor] Verify if the number is valid and convert it to decimal
+  /// @param _data BaseConverterData struct with the number and origin base
+  BaseConverter(BaseConverterData* data) : _data(*data) {
+    if (isValidNumber()) {
+      _numDecimal = strToDec();
+    } else {
+      cout << "Error: invalid number (non-digit character detected)!" << endl;
+    }
+  }
+
+  /// @brief [Modifier] Set the number to be converted and its base
+  /// @param data Pointer to the BaseConverterData struct with the number and origin base
+  BaseConverterError setNumber(BaseConverterData* data) {
+    _data.numStr = data->numStr;
+    _data.originBase = data->originBase;
+    if (!isValidNumber()) {
+      cout << "Error: invalid number";
+      return BaseConverterError::ERROR_INVALID_NUMBER;
+    }
+    _numDecimal = strToDec();
+    return BaseConverterError::ERROR_OK;
+  }
+
+  /// @brief [Selector] Get the current number to be converted and its base
+  /// @param data Pointer to the struct where number and base should be saved
+  void getNumber(BaseConverterData* data) const {
+    data->numStr = _data.numStr;
+    data->originBase = _data.originBase;
   }
 
   /// @brief Convert the number to a selected numeral system
@@ -115,36 +136,16 @@ class BaseConverter {
     return ret;
   };
 
-  /// @brief Set the number to be converted and its base
-  /// @param data Pointer to the BaseConverterData struct with the number and origin base
-  BaseConverterError setNumber(BaseConverterData* data) {
-    _data.numStr = data->numStr;
-    _data.originBase = data->originBase;
-    if (!isValidNumber()) {
-      cout << "Error: invalid number";
-      return BaseConverterError::ERROR_INVALID_NUMBER;
-    }
-    _numDecimal = strToDec();
-    return BaseConverterError::ERROR_OK;
-  }
-
-  /// @brief Get the current number to be converted and its base
-  /// @param data Pointer to the struct where number and base should be saved
-  void getNumber(BaseConverterData* data) const {
-    data->numStr = _data.numStr;
-    data->originBase = _data.originBase;
-  }
-
   /// @brief Print the current number and its numeral system
-  BaseConverterError printNumber(void) const {
+  BaseConverterError printNumber() const {
     if (!_isValid) {
       cout << "Error: the current number is not valid!" << endl;
       return BaseConverterError::ERROR_INVALID_NUMBER;
     }
-
     cout << "Value: " << _data.numStr << ", ";
     cout << "Numeral system: " << BASE_TO_STRING[static_cast<NUMBASE_SIZE>(_data.originBase)] << endl;
-    return BaseConverterError::ERROR_OK;;
+    return BaseConverterError::ERROR_OK;
+    ;
   }
 
  protected:
@@ -273,7 +274,7 @@ bool testBaseConverter() {
     BaseConverterData convData = {numIn, fromBase};
     BaseConverter conv;
     ret = conv.setNumber(&convData);
-    if(ret != BaseConverterError::ERROR_OK) {
+    if (ret != BaseConverterError::ERROR_OK) {
       cout << "Error: " << static_cast<BASECONVERTERERROR_SIZE>(ret) << " !" << endl;
     }
 
