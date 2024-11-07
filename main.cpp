@@ -14,7 +14,8 @@ bool testBaseConverter();
                         TYPEDEFS, MACROS AND CONSTS
 ===========================================================================*/
 
-#define NUMBASE_SIZE uint8_t
+#define BASECONVERTERERROR_SIZE uint32_t
+#define NUMBASE_SIZE uint32_t
 #define NUMBASE_FILEDS 4
 
 /// @brief Numeral base type
@@ -23,6 +24,15 @@ enum class NumBase : NUMBASE_SIZE {
   BASE_OCT = 1,
   BASE_DEC = 2,
   BASE_HEX = 3
+};
+
+/// @brief BaseConverter Error type
+enum class BaseConverterError : BASECONVERTERERROR_SIZE {
+  ERROR_OK,
+  ERROR_INVALID_NUMBER,
+  ERROR_INVALID_BASE,
+  ERROR_CONVERSION_FAULT,
+  ERROR_GENERIC
 };
 
 /// @brief Base (uint8_t) mapping of NumBase enum
@@ -56,7 +66,7 @@ class BaseConverter {
  public:
   /// @brief [Constructor with data struct] Verify if the number is valid and convert it to decimal
   /// @param _data BaseConverterData struct with the number and origin base
-  BaseConverter(const BaseConverterData data) : _data(data) {
+  BaseConverter(BaseConverterData* data) : _data(*data) {
     if (!isValidNumber()) {
       cout << "Error: invalid number (non-digit character detected)!" << endl;
     }
@@ -65,16 +75,18 @@ class BaseConverter {
 
   /// @brief [Constructor no parameters]
   BaseConverter() {
-    _isValid = false; // No number and base provided
+    _isValid = false;  // No number and base provided
   }
 
   /// @brief Convert the number to a selected numeral system
   /// @param target_base Target base
   /// @param result Pointer to a string for storing the result of the conversion
-  void toBase(NumBase target_base, string* result) {
+  BaseConverterError toBase(const NumBase target_base, string* result) {
+    BaseConverterError ret = BaseConverterError::ERROR_OK;
     if (!_isValid) {
       cout << "Error: the current number is not valid!" << endl;
-      return;
+      ret = BaseConverterError::ERROR_INVALID_NUMBER;
+      return ret;
     }
 
     switch (target_base) {
@@ -95,33 +107,44 @@ class BaseConverter {
         break;
       }
       default: {
-        *result = "Error: incorrect target base";
+        *result = "";
+        ret = BaseConverterError::ERROR_INVALID_BASE;
         break;
       }
     }
-    return;
+    return ret;
   };
 
   /// @brief Set the number to be converted and its base
-  /// @param data BaseConverterData struct with the number and origin base
-  void setNumber(const BaseConverterData data) {
-    _data.numStr = data.numStr;
-    _data.originBase = data.originBase;
+  /// @param data Pointer to the BaseConverterData struct with the number and origin base
+  BaseConverterError setNumber(BaseConverterData* data) {
+    _data.numStr = data->numStr;
+    _data.originBase = data->originBase;
     if (!isValidNumber()) {
       cout << "Error: invalid number";
+      return BaseConverterError::ERROR_INVALID_NUMBER;
     }
     _numDecimal = strToDec();
+    return BaseConverterError::ERROR_OK;
+  }
+
+  /// @brief Get the current number to be converted and its base
+  /// @param data Pointer to the struct where number and base should be saved
+  void getNumber(BaseConverterData* data) const {
+    data->numStr = _data.numStr;
+    data->originBase = _data.originBase;
   }
 
   /// @brief Print the current number and its numeral system
-  void printNumber(void) {
+  BaseConverterError printNumber(void) const {
     if (!_isValid) {
       cout << "Error: the current number is not valid!" << endl;
-      return;
+      return BaseConverterError::ERROR_INVALID_NUMBER;
     }
 
     cout << "Value: " << _data.numStr << ", ";
     cout << "Numeral system: " << BASE_TO_STRING[static_cast<NUMBASE_SIZE>(_data.originBase)] << endl;
+    return BaseConverterError::ERROR_OK;;
   }
 
  protected:
@@ -242,13 +265,17 @@ bool testBaseConverter() {
   string numOut, numIn = "101";
   NumBase fromBase, toBase;
   uint32_t testNo = 0;
+  BaseConverterError ret;
 
   // Itterate though all starting bases
   for (NUMBASE_SIZE fromBaseUint = 0; fromBaseUint < NUMBASE_FILEDS; fromBaseUint++) {
     fromBase = static_cast<NumBase>(fromBaseUint);
     BaseConverterData convData = {numIn, fromBase};
     BaseConverter conv;
-    conv.setNumber(convData);
+    ret = conv.setNumber(&convData);
+    if(ret != BaseConverterError::ERROR_OK) {
+      cout << "Error: " << static_cast<BASECONVERTERERROR_SIZE>(ret) << " !" << endl;
+    }
 
     // Itterate though all target bases
     for (NUMBASE_SIZE toBaseUint = 0; toBaseUint < NUMBASE_FILEDS; toBaseUint++) {
