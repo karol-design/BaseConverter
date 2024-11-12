@@ -1,28 +1,44 @@
-#include <iostream>
-#include <string>
 #include <BaseConverter.hpp>
 #include <Interface.hpp>
+#include <iostream>
+#include <string>
+
+const static std::string APP_NAME = "BaseConverter";
+const static std::string APP_DESCRIPTION = "CLI app for converting numbers between various numeral systems.";
+const static std::string APP_VERSION = "1.0";
+const static std::string APP_HELP =
+    "Usage: ./baseconv [NUMBER] [TARGET_BASE] \n"
+    "Convert the NUMBER to TARGET_BASE and print the result.\n"
+    "TAGET_BASE has to be one of the following: BIN, OCT, DEC, HEX.\n"
+    "Base of the NUMBER is detected automatically:\n"
+    "   - BIN if the number starts from b or B;\n"
+    "   - OCT if the number starts from 0;\n"
+    "   - HEX if the number starts from 0x or 0X;\n"
+    "   - DEC otherwise (default);\n\n"
+    "Possible agruments:\n"
+    "   -h   Display this help and exit.\n"
+    "Usage example:\n"
+    "   ./baseconv 0xFF0A10 BIN \n";
 
 bool testBaseConverter();
-
-/// @brief Struct with the initial data for the CLI initialization
-// typedef struct {
-//   std::string appName;
-//   std::string appDescription;
-//   std::string appHelpContent;
-//   uint64_t appVersion;
-// } CliData;
 
 /*===========================================================================
                             MAIN FUNCTION
 ===========================================================================*/
 
-int main() {
+int main(int argc, char* argv[]) {
   // Instantiate the core converter and pass it to the CLI instance
   BaseConverter conv;
-  Interface cli(&conv);
+  tCliData CliData = {
+      argc,
+      argv,
+      &APP_NAME,
+      &APP_DESCRIPTION,
+      &APP_VERSION,
+      &APP_HELP,
+      &conv};
 
-  // Run the CLI loop
+  Interface cli(CliData);
   cli.run();
 
   bool result = testBaseConverter();

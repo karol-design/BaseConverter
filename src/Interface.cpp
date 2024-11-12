@@ -2,49 +2,91 @@
 #include <iostream>
 
 // Constructor
-Interface::Interface(BaseConverter* conv_ptr) : _conv(conv_ptr) {}
+Interface::Interface(tCliData CliData) : _CliData(CliData) {}
 
-// Usage: BaseConv 0x4f00 BIN / BaseConv -h / BaseConv
 void Interface::run() {
-  std::string str = "Test!";
-  processInput(&str);  // Process the input, i.e. arguments (incl. flags) and populate adequately the CLI config struct
+  processInput();
   switch (_state) {
-    case (InterfaceState::STATE_MENU): {
-      showMenu();
+    case (InterfaceState::STATE_START): {
+      showWelcomeMessage();
       break;
     }
     case (InterfaceState::STATE_CONVERT): {
       handleConvert();
       break;
     }
-    case (InterfaceState::STATE_HELP): {
-      handleHelp();
-      break;
-    }
-    case (InterfaceState::STATE_ERROR):
+    case (InterfaceState::STATE_HELP):
     default: {
-      handleError();
+      handleHelp();
       break;
     }
   }
 }
 
-void Interface::processInput(const std::string* input) {
-  _state = InterfaceState::STATE_ERROR;
+void Interface::processInput() {
+  // If there are no arguments
+  if (_CliData.argc == 1) {
+    _state = InterfaceState::STATE_START;
+    return;
+  }
+
+  if (*(_CliData.argv + 1) == "-h") {
+    _state = InterfaceState::STATE_HELP;
+    return;
+  }
+
+  if (_CliData.argc == 3) {
+    std::string str = *(_CliData.argv + 1);
+    getBase(&str);
+    _convData.numStr = str;
+    _state = InterfaceState::STATE_CONVERT;
+
+    str = *(_CliData.argv + 2);
+    if (str.compare("BIN") == 0) {
+      _targetBase = NumBase::BASE_BIN;
+    } else if (str.compare("OCT") == 0) {
+      _targetBase = NumBase::BASE_OCT;
+    } else if (str.compare("DEC") == 0) {
+      _targetBase = NumBase::BASE_DEC;
+    } else if (str.compare("HEX") == 0) {
+      _targetBase = NumBase::BASE_HEX;
+    } else {
+      _state = InterfaceState::STATE_HELP;
+    }
+  } else {
+    _state = InterfaceState::STATE_HELP;
+  }
 }
 
-void Interface::showMenu() {
-  std::cout << "Menu" << std::endl;
+void Interface::getBase(std::string* num) {
+  if (num->find("0x") == 0 || num->find("0X") == 0) {
+    num->erase(0, 2);
+    _convData.originBase = NumBase::BASE_HEX;
+  } else if (num->find("b") == 0 || num->find("B") == 0) {
+    num->erase(0, 1);
+    _convData.originBase = NumBase::BASE_BIN;
+  } else if (num->find("0") == 0) {
+    num->erase(0, 1);
+    _convData.originBase = NumBase::BASE_OCT;
+  } else {
+    _convData.originBase = NumBase::BASE_DEC;
+  }
+}
+
+void Interface::showWelcomeMessage() {
+  std::cout << "### " << *_CliData.appName << " ###" << std::endl;
+  std::cout << *_CliData.appDescription << std::endl;
+  std::cout << "Version: " << *_CliData.appVersion << ", Use -h to invoke the manual." << std::endl;
 }
 
 void Interface::handleHelp() {
-  std::cout << "Help" << std::endl;
+  std::cout << _CliData.appHelpContent;
 }
 
 void Interface::handleConvert() {
-  std::cout << "Convert" << std::endl;
-}
-
-void Interface::handleError() {
-  std::cout << "Error" << std::endl;
+  std::string result;
+  _CliData.conv->setNumber(&_convData);
+  _CliData.conv->printNumber();
+  _CliData.conv->toBase(_targetBase, &result);
+  std::cout << "Result: " << result << std::endl;
 }

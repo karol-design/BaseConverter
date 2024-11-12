@@ -5,7 +5,7 @@
 static const uint8_t BASE_TO_UINT[] = {2, 8, 10, 16};
 
 /// @brief String mapping of NumBase enum
-static const char* BASE_TO_STRING[] = {"Binary", "Octal", "Decimal", "Hexadecimal"};
+static const char* BASE_TO_STRING[] = {"BIN", "OCT", "DEC", "HEX"};
 
 /// @brief [Constructor]
 BaseConverter::BaseConverter() {
@@ -93,9 +93,9 @@ BaseConverterError BaseConverter::printNumber() const {
 
 bool BaseConverter::isValidNumber() {
   _isValid = true;
-  // Itterate through the string and validate if contains only digits
+  // Itterate through the string and validate if contains only DEC/HEX numeric characters
   for (const char& c : _data.numStr) {
-    if (!isdigit(c)) {
+    if (!isxdigit(c)) {
       _isValid = false;
       break;
     }

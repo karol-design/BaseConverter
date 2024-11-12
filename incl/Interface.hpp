@@ -6,33 +6,45 @@
 
 #define INTERFACESTATE_SIZE uint32_t
 
+/// @brief Struct with the initial data for the CLI initialization
+typedef struct {
+  int argc;
+  char** argv;
+  const std::string* appName;
+  const std::string* appDescription;
+  const std::string* appVersion;
+  const std::string* appHelpContent;
+  BaseConverter* conv;
+} tCliData;
+
 /// @brief Command Line Interface state type
 enum class InterfaceState : INTERFACESTATE_SIZE {
-  STATE_MENU,
+  STATE_START,
   STATE_CONVERT,
-  STATE_HELP,
-  STATE_ERROR
+  STATE_HELP
 };
 
 /// @brief Command Line Interface Class
 class Interface {
  public:
   // [Constructor]
-  Interface(BaseConverter* conv_ptr);
+  Interface(tCliData CliData);
 
   // Usage: BaseConv 0x4f00 BIN / BaseConv -h / BaseConv
   void run();
 
  protected:
  private:
-  BaseConverter* _conv;
+  tCliData _CliData;
   InterfaceState _state;
+  NumBase _targetBase;
+  BaseConverterData _convData;
 
-  void processInput(const std::string* input);
-  void showMenu();
+  void processInput();
+  void getBase(std::string* num);
+  void showWelcomeMessage();
   void handleHelp();
   void handleConvert();
-  void handleError();
 };
 
 #endif /* INTERFACE_HPP */
