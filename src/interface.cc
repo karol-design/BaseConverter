@@ -4,7 +4,13 @@
 #include <iostream>
 
 // Constructor
-Interface::Interface(CliData cli_data) : cli_data_(cli_data) {}
+Interface::Interface(CliData cli_data) {
+  if(!cli_data.app_description || !cli_data.app_help_content || !cli_data.app_name || !cli_data.app_version || !cli_data.argv || !cli_data.conv) {
+    std::cout << "Error: invalid argument (NULL pointer)!" << std::endl;
+  } else {
+    cli_data_ = cli_data;
+  }
+}
 
 void Interface::runInterface() {
   processInput();
