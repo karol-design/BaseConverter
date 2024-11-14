@@ -1,21 +1,23 @@
-#include <Interface.hpp>
+#include <interface.h>
+
+#include <cstring>
 #include <iostream>
 
 // Constructor
-Interface::Interface(tCliData CliData) : _CliData(CliData) {}
+Interface::Interface(CliData cli_data) : cli_data_(cli_data) {}
 
-void Interface::run() {
+void Interface::runInterface() {
   processInput();
-  switch (_state) {
-    case (InterfaceState::STATE_START): {
-      showWelcomeMessage();
+  switch (interface_state_) {
+    case (InterfaceState::START): {
+      showDescription();
       break;
     }
-    case (InterfaceState::STATE_CONVERT): {
+    case (InterfaceState::CONVERT): {
       handleConvert();
       break;
     }
-    case (InterfaceState::STATE_HELP):
+    case (InterfaceState::HELP):
     default: {
       handleHelp();
       break;
@@ -25,68 +27,97 @@ void Interface::run() {
 
 void Interface::processInput() {
   // If there are no arguments
-  if (_CliData.argc == 1) {
-    _state = InterfaceState::STATE_START;
+  if (cli_data_.argc == 1) {
+    interface_state_ = InterfaceState::START;
     return;
   }
 
-  if (*(_CliData.argv + 1) == "-h") {
-    _state = InterfaceState::STATE_HELP;
+  if (!strcmp(*(cli_data_.argv + 1), "-h") || !strcmp(*(cli_data_.argv + 1), "--help")) {
+    interface_state_ = InterfaceState::HELP;
     return;
   }
 
-  if (_CliData.argc == 3) {
-    std::string str = *(_CliData.argv + 1);
+  if (cli_data_.argc >= 3) {
+    std::string str = *(cli_data_.argv + 1);
     getBase(&str);
-    _convData.numStr = str;
-    _state = InterfaceState::STATE_CONVERT;
+    conversion_data_.num_str = str;
+    interface_state_ = InterfaceState::CONVERT;
 
-    str = *(_CliData.argv + 2);
+    str = *(cli_data_.argv + 2);
     if (str.compare("BIN") == 0) {
-      _targetBase = NumBase::BASE_BIN;
+      target_base_ = NumBase::BIN;
     } else if (str.compare("OCT") == 0) {
-      _targetBase = NumBase::BASE_OCT;
+      target_base_ = NumBase::OCT;
     } else if (str.compare("DEC") == 0) {
-      _targetBase = NumBase::BASE_DEC;
+      target_base_ = NumBase::DEC;
     } else if (str.compare("HEX") == 0) {
-      _targetBase = NumBase::BASE_HEX;
+      target_base_ = NumBase::HEX;
     } else {
-      _state = InterfaceState::STATE_HELP;
+      interface_state_ = InterfaceState::HELP;
     }
+
+    if (cli_data_.argc >= 4 && (!strcmp(*(cli_data_.argv + 3), "-v") || !strcmp(*(cli_data_.argv + 3), "--verbose"))) {
+      is_debug_activated_ = true;
+    } else {
+      is_debug_activated_ = false;
+    }
+
   } else {
-    _state = InterfaceState::STATE_HELP;
+    interface_state_ = InterfaceState::HELP;
   }
 }
 
 void Interface::getBase(std::string* num) {
   if (num->find("0x") == 0 || num->find("0X") == 0) {
     num->erase(0, 2);
-    _convData.originBase = NumBase::BASE_HEX;
+    conversion_data_.origin_base = NumBase::HEX;
   } else if (num->find("b") == 0 || num->find("B") == 0) {
     num->erase(0, 1);
-    _convData.originBase = NumBase::BASE_BIN;
+    conversion_data_.origin_base = NumBase::BIN;
   } else if (num->find("0") == 0) {
     num->erase(0, 1);
-    _convData.originBase = NumBase::BASE_OCT;
+    conversion_data_.origin_base = NumBase::OCT;
   } else {
-    _convData.originBase = NumBase::BASE_DEC;
+    conversion_data_.origin_base = NumBase::DEC;
   }
 }
 
-void Interface::showWelcomeMessage() {
-  std::cout << "### " << *_CliData.appName << " ###" << std::endl;
-  std::cout << *_CliData.appDescription << std::endl;
-  std::cout << "Version: " << *_CliData.appVersion << ", Use -h to invoke the manual." << std::endl;
+void Interface::showDescription() {
+  std::cout << "### " << *cli_data_.app_name << " ###" << std::endl;
+  std::cout << *cli_data_.app_description << std::endl;
+  std::cout << "Version: " << *cli_data_.app_version << ", Use -h to invoke the manual." << std::endl;
 }
 
 void Interface::handleHelp() {
-  std::cout << _CliData.appHelpContent;
+  std::cout << *cli_data_.app_help_content;
 }
 
 void Interface::handleConvert() {
+  BaseConverterError ret;
   std::string result;
-  _CliData.conv->setNumber(&_convData);
-  _CliData.conv->printNumber();
-  _CliData.conv->toBase(_targetBase, &result);
-  std::cout << "Result: " << result << std::endl;
+  ret = cli_data_.conv->setNumber(&conversion_data_);
+  if (ret != BaseConverterError::OK) {
+    std::cout << "Setting number failed! Error: " << static_cast<BASECONVERTERERROR_SIZE>(ret) << " !" << std::endl;
+    return;
+  }
+
+  if (is_debug_activated_) {
+    ret = cli_data_.conv->printNumber();
+    if (ret != BaseConverterError::OK) {
+      std::cout << "Printing number failed! Error: " << static_cast<BASECONVERTERERROR_SIZE>(ret) << " !" << std::endl;
+      return;
+    }
+  }
+
+  ret = cli_data_.conv->toBase(target_base_, &result);
+  if (ret != BaseConverterError::OK) {
+    std::cout << "Converting the number failed! Error: " << static_cast<BASECONVERTERERROR_SIZE>(ret) << " !" << std::endl;
+    return;
+  }
+
+  if (is_debug_activated_) {
+    std::cout << "Conversion output: ";
+  }
+
+  std::cout << result << std::endl;
 }

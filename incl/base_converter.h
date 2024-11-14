@@ -1,5 +1,5 @@
-#ifndef BASECONVERTER_HPP
-#define BASECONVERTER_HPP
+#ifndef BASE_CONVERTER_H_
+#define BASE_CONVERTER_H_
 
 #include <format>
 #include <string>
@@ -10,43 +10,45 @@
 
 /// @brief Numeral base type
 enum class NumBase : NUMBASE_SIZE {
-  BASE_BIN = 0,
-  BASE_OCT = 1,
-  BASE_DEC = 2,
-  BASE_HEX = 3
+  BIN,
+  OCT,
+  DEC,
+  HEX
 };
 
 /// @brief BaseConverter Error type
 enum class BaseConverterError : BASECONVERTERERROR_SIZE {
-  ERROR_OK,
-  ERROR_INVALID_NUMBER,
-  ERROR_INVALID_BASE,
-  ERROR_CONVERSION_FAULT,
-  ERROR_GENERIC
+  OK,
+  INVALID_NUMBER,
+  INVALID_BASE,
+  INVALID_POINTER,
+  CONVERSION_FAULT,
+  GENERIC
 };
 
-/// @brief Struct with the initial data for number conversion
-typedef struct {
-  std::string numStr;
-  NumBase originBase;
-} BaseConverterData;
+/// @brief Struct with the data for number conversion
+struct BaseConverterData {
+  std::string num_str;
+  NumBase origin_base;
+};
 
+/// @brief Converter between numeral systems
 class BaseConverter {
  public:
   /// @brief [Constructor]
   BaseConverter();
 
   /// @brief [Constructor] Verify if the number is valid and convert it to decimal
-  /// @param _data BaseConverterData struct with the number and origin base
-  BaseConverter(BaseConverterData* data);
+  /// @param conversion_data BaseConverterData struct with the number and origin base
+  BaseConverter(BaseConverterData* conversion_data);
 
   /// @brief [Modifier] Set the number to be converted and its base
-  /// @param data Pointer to the BaseConverterData struct with the number and origin base
-  BaseConverterError setNumber(BaseConverterData* data);
+  /// @param conversion_data Pointer to the BaseConverterData struct with the number and origin base
+  BaseConverterError setNumber(BaseConverterData* conversion_data);
 
   /// @brief [Selector] Get the current number to be converted and its base
-  /// @param data Pointer to the struct where number and base should be saved
-  void getNumber(BaseConverterData* data) const;
+  /// @param conversion_data Pointer to the struct where number and base should be saved
+  BaseConverterError getNumber(BaseConverterData* conversion_data) const;
 
   /// @brief Convert the number to a selected numeral system
   /// @param target_base Target base
@@ -58,10 +60,10 @@ class BaseConverter {
 
  protected:
  private:
-  bool _isValid;  // Is the current number (to be converted) valid
-  BaseConverterData _data;
-  uint64_t _numDecimal;
-  bool isValidNumber();
+  bool is_num_valid_;  // Is the current number (to be converted) valid
+  BaseConverterData conversion_data_;
+  uint64_t num_decimal_;
+  bool isNumValid();
   uint64_t strToDec();
   std::string toDec();
   std::string toHex();
@@ -69,4 +71,4 @@ class BaseConverter {
   std::string toBin();
 };
 
-#endif /* BASECONVERTER_HPP */
+#endif /* BASE_CONVERTER_H_ */

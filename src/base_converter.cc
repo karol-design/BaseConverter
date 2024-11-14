@@ -1,4 +1,5 @@
-#include <BaseConverter.hpp>
+#include <base_converter.h>
+
 #include <iostream>
 
 /// @brief Base (uint8_t) mapping of NumBase enum
@@ -7,125 +8,122 @@ static const uint8_t BASE_TO_UINT[] = {2, 8, 10, 16};
 /// @brief String mapping of NumBase enum
 static const char* BASE_TO_STRING[] = {"BIN", "OCT", "DEC", "HEX"};
 
-/// @brief [Constructor]
 BaseConverter::BaseConverter() {
-  _isValid = false;  // No number and base provided
+  is_num_valid_ = false;  // No number and base provided
 }
 
-/// @brief [Constructor] Verify if the number is valid and convert it to decimal
-/// @param _data BaseConverterData struct with the number and origin base
-BaseConverter::BaseConverter(BaseConverterData* data) : _data(*data) {
-  if (isValidNumber()) {
-    _numDecimal = strToDec();
+BaseConverter::BaseConverter(BaseConverterData* conversion_data) : conversion_data_(*conversion_data) {
+  if (!conversion_data) {
+    std::cout << "Error: invalid pointer!" << std::endl;
+  } else if (isNumValid()) {
+    num_decimal_ = strToDec();
   } else {
     std::cout << "Error: invalid number (non-digit character detected)!" << std::endl;
   }
 }
 
-/// @brief [Modifier] Set the number to be converted and its base
-/// @param data Pointer to the BaseConverterData struct with the number and origin base
-BaseConverterError BaseConverter::setNumber(BaseConverterData* data) {
-  _data.numStr = data->numStr;
-  _data.originBase = data->originBase;
-  if (!isValidNumber()) {
-    std::cout << "Error: invalid number";
-    return BaseConverterError::ERROR_INVALID_NUMBER;
+BaseConverterError BaseConverter::setNumber(BaseConverterData* conversion_data) {
+  if (!conversion_data) {
+    return BaseConverterError::INVALID_POINTER;
   }
-  _numDecimal = strToDec();
-  return BaseConverterError::ERROR_OK;
+  conversion_data_.num_str = conversion_data->num_str;
+  conversion_data_.origin_base = conversion_data->origin_base;
+  if (!isNumValid()) {
+    return BaseConverterError::INVALID_NUMBER;
+  }
+  num_decimal_ = strToDec();
+  return BaseConverterError::OK;
 }
 
-/// @brief [Selector] Get the current number to be converted and its base
-/// @param data Pointer to the struct where number and base should be saved
-void BaseConverter::getNumber(BaseConverterData* data) const {
-  data->numStr = _data.numStr;
-  data->originBase = _data.originBase;
+BaseConverterError BaseConverter::getNumber(BaseConverterData* conversion_data) const {
+  if (!conversion_data) {
+    return BaseConverterError::INVALID_POINTER;
+  }
+  conversion_data->num_str = conversion_data_.num_str;
+  conversion_data->origin_base = conversion_data_.origin_base;
+  return BaseConverterError::OK;
 }
 
-/// @brief Convert the number to a selected numeral system
-/// @param target_base Target base
-/// @param result Pointer to a string for storing the result of the conversion
 BaseConverterError BaseConverter::toBase(const NumBase target_base, std::string* result) {
-  BaseConverterError ret = BaseConverterError::ERROR_OK;
-  if (!_isValid) {
-    std::cout << "Error: the current number is not valid!" << std::endl;
-    ret = BaseConverterError::ERROR_INVALID_NUMBER;
-    return ret;
+  if (!result) {
+    return BaseConverterError::INVALID_POINTER;
+  }
+
+  if (!is_num_valid_) {
+    return BaseConverterError::INVALID_NUMBER;
   }
 
   switch (target_base) {
-    case (NumBase::BASE_BIN): {
+    case (NumBase::BIN): {
       *result = toBin();
       break;
     }
-    case (NumBase::BASE_OCT): {
+    case (NumBase::OCT): {
       *result = toOct();
       break;
     }
-    case (NumBase::BASE_DEC): {
+    case (NumBase::DEC): {
       *result = toDec();
       break;
     }
-    case (NumBase::BASE_HEX): {
+    case (NumBase::HEX): {
       *result = toHex();
       break;
     }
     default: {
       *result = "";
-      ret = BaseConverterError::ERROR_INVALID_BASE;
+      return BaseConverterError::INVALID_BASE;
       break;
     }
   }
-  return ret;
+  return BaseConverterError::OK;
 }
 
-/// @brief Print the current number and its numeral system
 BaseConverterError BaseConverter::printNumber() const {
-  if (!_isValid) {
+  if (!is_num_valid_) {
     std::cout << "Error: the current number is not valid!" << std::endl;
-    return BaseConverterError::ERROR_INVALID_NUMBER;
+    return BaseConverterError::INVALID_NUMBER;
   }
-  std::cout << "Value: " << _data.numStr << ", ";
-  std::cout << "Numeral system: " << BASE_TO_STRING[static_cast<NUMBASE_SIZE>(_data.originBase)] << std::endl;
-  return BaseConverterError::ERROR_OK;
-  ;
+  std::cout << "Value: " << conversion_data_.num_str << ", ";
+  std::cout << "Numeral system: " << BASE_TO_STRING[static_cast<NUMBASE_SIZE>(conversion_data_.origin_base)] << std::endl;
+  return BaseConverterError::OK;
 }
 
-bool BaseConverter::isValidNumber() {
-  _isValid = true;
+bool BaseConverter::isNumValid() {
+  is_num_valid_ = true;
   // Itterate through the string and validate if contains only DEC/HEX numeric characters
-  for (const char& c : _data.numStr) {
+  for (const char& c : conversion_data_.num_str) {
     if (!isxdigit(c)) {
-      _isValid = false;
+      is_num_valid_ = false;
       break;
     }
   }
-  return _isValid;
+  return is_num_valid_;
 }
 
 uint64_t BaseConverter::strToDec() {
   size_t processed_chars;
-  long val = std::stol(_data.numStr.c_str(), &processed_chars, BASE_TO_UINT[static_cast<NUMBASE_SIZE>(_data.originBase)]);
+  long val = std::stol(conversion_data_.num_str.c_str(), &processed_chars, BASE_TO_UINT[static_cast<NUMBASE_SIZE>(conversion_data_.origin_base)]);
   uint64_t dec = static_cast<uint64_t>(val);
   return dec;
 }
 
 std::string BaseConverter::toDec() {
-  std::string ret = std::vformat("{:d}", std::make_format_args(_numDecimal));
+  std::string ret = std::vformat("{:d}", std::make_format_args(num_decimal_));
   return ret;
 }
 
 std::string BaseConverter::toHex() {
-  std::string ret = std::vformat("{:#x}", std::make_format_args(_numDecimal));
+  std::string ret = std::vformat("{:#x}", std::make_format_args(num_decimal_));
   return ret;
 }
 
 std::string BaseConverter::toOct() {
-  std::string ret = std::vformat("{:#o}", std::make_format_args(_numDecimal));
+  std::string ret = std::vformat("{:#o}", std::make_format_args(num_decimal_));
   return ret;
 }
 
 std::string BaseConverter::toBin() {
-  std::string ret = std::vformat("{:#b}", std::make_format_args(_numDecimal));
+  std::string ret = std::vformat("{:#b}", std::make_format_args(num_decimal_));
   return ret;
 }
