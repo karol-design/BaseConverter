@@ -34,6 +34,7 @@ General requirements:
 - Improve parameter validation and error handling
 - Review the commenting and its completeness
 - Review used coding style convention (if correct and consistent)
+- Reduce number of data members in favour of passing data as parameters of class methods (?)
 
 ## Conventions:
 Google C++ Style Guide
