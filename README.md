@@ -40,3 +40,6 @@ General requirements:
 
 ## Conventions:
 Google C++ Style Guide
+
+## Additional comments:
+Current version of this app is a mix between C and C++ (Procedural and OO programming), e.g. some functions provide the error as a return value, while in other cases C++ exceptions are used. The approach and convention should be unified at some point in the future.
