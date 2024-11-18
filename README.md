@@ -1,4 +1,4 @@
-# BaseConv | Numeral Systems Converter
+# BaseConverter | Numeral Systems Converter
 Simple CLI toolkit for converting numbers between any of the most popular numeral systems (**BIN, OCT, DEC, HEX**) 
 
 ## Building and using [on Windows]
