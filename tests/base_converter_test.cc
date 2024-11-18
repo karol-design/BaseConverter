@@ -38,6 +38,7 @@ int main() {
       // Verify if the output is identical to the expected value
       std::string expected = EXPECTED_OUTPUT[static_cast<NUMBASE_SIZE>(base_out)][static_cast<NUMBASE_SIZE>(base_in)];
       if (num_out != expected) {
+        std::cout << "Test failed! Got: " << num_out << ", while expected: " << expected << std::endl;
         return -1;
       }
     }
