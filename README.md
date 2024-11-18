@@ -37,9 +37,8 @@ General requirements:
 - Review the commenting and its completeness
 - Review used coding style convention (if correct and consistent)
 - Reduce number of data members in favour of passing data as parameters of class methods (?)
+- Methods toDec(), toHex() ... could be unified into one toBase(base)
+- Use exceptions (OOP) or return values (procedural) more coherently
 
 ## Conventions:
-Google C++ Style Guide
-
-## Additional comments:
-Current version of this app is a mix between C and C++ (Procedural and OO programming), e.g. some functions provide the error as a return value, while in other cases C++ exceptions are used. The approach and convention should be unified at some point in the future.
+Google C++ Style Guide (to some extend)
