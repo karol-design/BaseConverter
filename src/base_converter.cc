@@ -103,27 +103,64 @@ bool BaseConverter::isNumValid() {
 
 uint64_t BaseConverter::strToDec() {
   size_t processed_chars;
-  long val = std::stol(conversion_data_.num_str.c_str(), &processed_chars, BASE_TO_UINT[static_cast<NUMBASE_SIZE>(conversion_data_.origin_base)]);
+  int64_t val = 0;
+  try {
+    val = std::stoll(conversion_data_.num_str.c_str(), &processed_chars, BASE_TO_UINT[static_cast<NUMBASE_SIZE>(conversion_data_.origin_base)]);
+  }
+
+  catch (std::invalid_argument const& ex) {
+    std::cout << "Invalid argument (std::invalid_argument); Cause: " << ex.what() << std::endl;
+  } catch (std::out_of_range const& ex) {
+    std::cout << "Out of range (std::out_of_range); Cause: " << ex.what() << std::endl;
+  }
   uint64_t dec = static_cast<uint64_t>(val);
   return dec;
 }
 
 std::string BaseConverter::toDec() {
-  std::string ret = std::vformat("{:d}", std::make_format_args(num_decimal_));
+  std::string ret = "";
+  try {
+    ret = std::vformat("{:d}", std::make_format_args(num_decimal_));
+  } catch (std::format_error const& ex) {
+    std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+  } catch (std::bad_alloc const& ex) {
+    std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+  }
   return ret;
 }
 
 std::string BaseConverter::toHex() {
-  std::string ret = std::vformat("{:#x}", std::make_format_args(num_decimal_));
+  std::string ret = "";
+  try {
+    ret = std::vformat("{:#x}", std::make_format_args(num_decimal_));
+  } catch (std::format_error const& ex) {
+    std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+  } catch (std::bad_alloc const& ex) {
+    std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+  }
   return ret;
 }
 
 std::string BaseConverter::toOct() {
-  std::string ret = std::vformat("{:#o}", std::make_format_args(num_decimal_));
+  std::string ret = "";
+  try {
+    ret = std::vformat("{:#o}", std::make_format_args(num_decimal_));
+  } catch (std::format_error const& ex) {
+    std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+  } catch (std::bad_alloc const& ex) {
+    std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+  }
   return ret;
 }
 
 std::string BaseConverter::toBin() {
-  std::string ret = std::vformat("{:#b}", std::make_format_args(num_decimal_));
+  std::string ret = "";
+  try {
+    ret = std::vformat("{:#b}", std::make_format_args(num_decimal_));
+  } catch (std::format_error const& ex) {
+    std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+  } catch (std::bad_alloc const& ex) {
+    std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+  }
   return ret;
 }

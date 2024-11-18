@@ -50,13 +50,13 @@ void Interface::processInput() {
     interface_state_ = InterfaceState::CONVERT;
 
     str = *(cli_data_.argv + 2);
-    if (str.compare("BIN") == 0) {
+    if (!str.compare("BIN")) {
       target_base_ = NumBase::BIN;
-    } else if (str.compare("OCT") == 0) {
+    } else if (!str.compare("OCT")) {
       target_base_ = NumBase::OCT;
-    } else if (str.compare("DEC") == 0) {
+    } else if (!str.compare("DEC")) {
       target_base_ = NumBase::DEC;
-    } else if (str.compare("HEX") == 0) {
+    } else if (!str.compare("HEX")) {
       target_base_ = NumBase::HEX;
     } else {
       interface_state_ = InterfaceState::HELP;
