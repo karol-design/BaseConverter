@@ -1,10 +1,12 @@
 # BaseConv | Numeral Systems Converter
 Simple CLI toolkit for converting numbers between any of the most popular numeral systems (**BIN, OCT, DEC, HEX**) 
 
-## Building [on Windows]
+## Building and using [on Windows]
 ```console
 $ cmake -B .\build -G "MinGW Makefiles"
 $ cmake --build .\build
+$ cd .\build
+$ ./baseconverter --help
 ```
 
 ## Testing
