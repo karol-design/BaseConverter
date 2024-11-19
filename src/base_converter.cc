@@ -110,8 +110,10 @@ uint64_t BaseConverter::strToDec() {
 
   catch (std::invalid_argument const& ex) {
     std::cout << "Invalid argument (std::invalid_argument); Cause: " << ex.what() << std::endl;
+    exit(-1);
   } catch (std::out_of_range const& ex) {
     std::cout << "Out of range (std::out_of_range); Cause: " << ex.what() << std::endl;
+    exit(-1);
   }
   uint64_t dec = static_cast<uint64_t>(val);
   return dec;
@@ -123,8 +125,10 @@ std::string BaseConverter::toDec() {
     ret = std::vformat("{:d}", std::make_format_args(num_decimal_));
   } catch (std::format_error const& ex) {
     std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+    exit(-1);
   } catch (std::bad_alloc const& ex) {
     std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+    exit(-1);
   }
   return ret;
 }
@@ -135,8 +139,10 @@ std::string BaseConverter::toHex() {
     ret = std::vformat("{:#x}", std::make_format_args(num_decimal_));
   } catch (std::format_error const& ex) {
     std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+    exit(-1);
   } catch (std::bad_alloc const& ex) {
     std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+    exit(-1);
   }
   return ret;
 }
@@ -147,8 +153,10 @@ std::string BaseConverter::toOct() {
     ret = std::vformat("{:#o}", std::make_format_args(num_decimal_));
   } catch (std::format_error const& ex) {
     std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+    exit(-1);
   } catch (std::bad_alloc const& ex) {
     std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+    exit(-1);
   }
   return ret;
 }
@@ -159,8 +167,10 @@ std::string BaseConverter::toBin() {
     ret = std::vformat("{:#b}", std::make_format_args(num_decimal_));
   } catch (std::format_error const& ex) {
     std::cout << "Format error (std::format_error); Cause: " << ex.what() << std::endl;
+    exit(-1);
   } catch (std::bad_alloc const& ex) {
     std::cout << "Bad allocation (std::bad_alloc); Cause: " << ex.what() << std::endl;
+    exit(-1);
   }
   return ret;
 }
