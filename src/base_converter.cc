@@ -8,7 +8,7 @@ const int EXIT_ON_ERROR_VAL = -1;
 static const uint8_t BASE_TO_UINT[] = {2, 8, 10, 16};
 
 /// @brief String mapping of NumBase enum
-static const char* BASE_TO_STRING[] = {"BIN", "OCT", "DEC", "HEX"};
+static const std::string BASE_TO_STRING[] = {"BIN", "OCT", "DEC", "HEX"};
 
 BaseConverter::BaseConverter() {
   is_num_valid_ = false;  // No number and base provided
