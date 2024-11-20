@@ -3,6 +3,7 @@
 
 #include <base_converter.h>
 
+#include <string>
 #include <format>
 
 #define INTERFACESTATE_SIZE uint32_t

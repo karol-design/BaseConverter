@@ -2,10 +2,29 @@
 
 #include <cstring>
 #include <iostream>
+#include <map>
+
+const std::string HEX_PREFIX_LOWER = "0x";
+const std::string HEX_PREFIX_UPPER = "0X";
+const std::string BIN_PREFIX_LOWER = "b";
+const std::string BIN_PREFIX_UPPER = "B";
+const std::string OCT_PREFIX = "0";
+
+const std::string BIN_ABBREVIATION = "BIN";
+const std::string OCT_ABBREVIATION = "OCT";
+const std::string DEC_ABBREVIATION = "DEC";
+const std::string HEX_ABBREVIATION = "HEX";
+
+// Mapping of abbreviations to NumBase
+const std::map<std::string, NumBase> BASE_ABBREVIATION_MAP = {
+    {BIN_ABBREVIATION, NumBase::BIN},
+    {OCT_ABBREVIATION, NumBase::OCT},
+    {DEC_ABBREVIATION, NumBase::DEC},
+    {HEX_ABBREVIATION, NumBase::HEX}};
 
 // Constructor
 Interface::Interface(CliData cli_data) {
-  if(!cli_data.app_description || !cli_data.app_help_content || !cli_data.app_name || !cli_data.app_version || !cli_data.argv || !cli_data.conv) {
+  if (!cli_data.app_description || !cli_data.app_help_content || !cli_data.app_name || !cli_data.app_version || !cli_data.argv || !cli_data.conv) {
     std::cout << "Error: invalid argument (NULL pointer)!" << std::endl;
   } else {
     cli_data_ = cli_data;
@@ -50,15 +69,16 @@ void Interface::processInput() {
     interface_state_ = InterfaceState::CONVERT;
 
     str = *(cli_data_.argv + 2);
-    if (!str.compare("BIN")) {
-      target_base_ = NumBase::BIN;
-    } else if (!str.compare("OCT")) {
-      target_base_ = NumBase::OCT;
-    } else if (!str.compare("DEC")) {
-      target_base_ = NumBase::DEC;
-    } else if (!str.compare("HEX")) {
-      target_base_ = NumBase::HEX;
-    } else {
+    bool target_base_valid = false;
+    for (const auto& [abbreviation, base] : BASE_ABBREVIATION_MAP) {
+      if (!str.compare(abbreviation)) {
+        target_base_ = base;
+        target_base_valid = true;
+        break;
+      }
+    }
+
+    if (!target_base_valid) {
       interface_state_ = InterfaceState::HELP;
     }
 
@@ -67,21 +87,20 @@ void Interface::processInput() {
     } else {
       is_debug_activated_ = false;
     }
-
   } else {
     interface_state_ = InterfaceState::HELP;
   }
 }
 
 void Interface::getBase(std::string* num) {
-  if (num->find("0x") == 0 || num->find("0X") == 0) {
-    num->erase(0, 2);
+  if (num->find(HEX_PREFIX_LOWER) == 0 || num->find(HEX_PREFIX_UPPER) == 0) {
+    num->erase(0, HEX_PREFIX_LOWER.length()); // TODO: Add error handling
     conversion_data_.origin_base = NumBase::HEX;
-  } else if (num->find("b") == 0 || num->find("B") == 0) {
-    num->erase(0, 1);
+  } else if (num->find(BIN_PREFIX_LOWER) == 0 || num->find(BIN_PREFIX_UPPER) == 0) {
+    num->erase(0, BIN_PREFIX_LOWER.length());
     conversion_data_.origin_base = NumBase::BIN;
-  } else if (num->find("0") == 0) {
-    num->erase(0, 1);
+  } else if (num->find(OCT_PREFIX) == 0) {
+    num->erase(0, OCT_PREFIX.length());
     conversion_data_.origin_base = NumBase::OCT;
   } else {
     conversion_data_.origin_base = NumBase::DEC;
